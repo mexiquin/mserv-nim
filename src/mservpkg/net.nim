@@ -6,7 +6,7 @@ import os
 import asyncdispatch
 
 # progress reporting for download
-proc onProgressChanged(total, progress, speed: BiggestInt) {.async.} =
+proc progressChanged(total, progress, speed: BiggestInt) {.async.} =
     echo("Downloaded ", progress, " of ", total)
     echo("Current rate: ", speed div 1000, "kb/s")
 
@@ -23,7 +23,7 @@ proc checkDLSuccess(fileDir:string, fileUrl:string): bool =
         return false
 
 # roughly Download file information from url
-proc downloadFromUrl*(url:string, outDir:string=""): bool =
+proc downloadFromUrl*(url:string, outDir:string="") {.async.} =
 
     var fullDir: string = ""
     var derivedFileame: string = extractFilename(url)
@@ -34,8 +34,6 @@ proc downloadFromUrl*(url:string, outDir:string=""): bool =
         fullDir = os.joinPath(outDir, derivedFileame)
     # Download the file from the internet
     var dlClient = newAsyncHttpClient()
-    dlClient.onProgressChanged = onProgressChanged
+    dlClient.onProgressChanged = progressChanged
     await dlClient.downloadFile(url, fullDir)
-
-    return checkDLSuccess(fullDir, url)
     
