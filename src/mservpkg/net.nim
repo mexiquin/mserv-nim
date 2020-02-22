@@ -4,10 +4,13 @@ import strutils
 import httpclient
 import os
 import asyncdispatch
+import math
 
 # progress reporting for download
 proc progressChanged(total, progress, speed: BiggestInt) {.async.} =
-    echo("Downloaded ", progress, " of ", total)
+    # Calculate the percentage
+    var perc = (progress.int / total.int) * 100
+    echo("Downloaded ", perc.floor.int, "%")
     echo("Current rate: ", speed div 1000, "kb/s")
 
 # rough method of extracting file name from url string
@@ -16,14 +19,14 @@ proc extractFilename(url:string): string =
     return name[name.high]
 
 # Check to make sure that the file made the journey safely
-proc checkDLSuccess(fileDir:string, fileUrl:string): bool = 
+proc checkDLSuccess*(fileDir:string, fileUrl:string): bool = 
     if fileExists(fileDir) and (fileDir.split)[fileDir.split.high] == extractFilename(fileUrl):
         return true
     else:
         return false
 
 # roughly Download file information from url
-proc downloadFromUrl*(url:string, outDir:string="") {.async.} =
+proc downloadFromUrl(url:string, outDir:string="") {.async.} =
 
     var fullDir: string = ""
     var derivedFileame: string = extractFilename(url)
@@ -36,4 +39,7 @@ proc downloadFromUrl*(url:string, outDir:string="") {.async.} =
     var dlClient = newAsyncHttpClient()
     dlClient.onProgressChanged = progressChanged
     await dlClient.downloadFile(url, fullDir)
+
+proc dlFile*(url: string, outDir = "") =
+    waitFor(downloadFromUrl(url, outDir))
     
