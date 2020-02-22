@@ -13,14 +13,25 @@ proc progressChanged(total, progress, speed: BiggestInt) {.async.} =
     echo("Downloaded ", perc.floor.int, "%")
     echo("Current rate: ", speed div 1000, "kb/s")
 
+proc fullFileDir(url:string, directory=""): string =
+    var derivedName = extractFilename(url)
+    var finalDir = ""
+    if directory == "":
+        finalDir = os.joinPath(os.getCurrentDir(), derivedName)
+    else:
+        finalDir = os.joinPath(directory, derivedName)
+
+    return finalDir
+
 # rough method of extracting file name from url string
 proc extractFilename(url:string): string =
     var name = url.split('/')
     return name[name.high]
 
 # Check to make sure that the file made the journey safely
-proc checkDLSuccess*(fileDir:string, fileUrl:string): bool = 
-    if fileExists(fileDir) and (fileDir.split)[fileDir.split.high] == extractFilename(fileUrl):
+proc checkDLSuccess(fileDir:string, fileUrl:string): bool = 
+    var fullDir = fullFileDir(fileUrl, fileDir)
+    if fileExists(fullDir) and fullDir.split('/')[fullDir.split('/').high] == extractFilename(fileUrl):
         return true
     else:
         return false
@@ -28,18 +39,14 @@ proc checkDLSuccess*(fileDir:string, fileUrl:string): bool =
 # roughly Download file information from url
 proc downloadFromUrl(url:string, outDir:string="") {.async.} =
 
-    var fullDir: string = ""
-    var derivedFileame: string = extractFilename(url)
-
-    if outDir is "":
-        fullDir = os.joinPath(os.getCurrentDir(), derivedFileame)
-    else:
-        fullDir = os.joinPath(outDir, derivedFileame)
+    var fullDir = fullFileDir(url, outDir)
     # Download the file from the internet
     var dlClient = newAsyncHttpClient()
     dlClient.onProgressChanged = progressChanged
     await dlClient.downloadFile(url, fullDir)
 
-proc dlFile*(url: string, outDir = "") =
+# Little absraction layer for the download (This is the method that should be used)
+proc dlFile*(url: string, outDir = ""): bool =
     waitFor(downloadFromUrl(url, outDir))
+    return checkDLSuccess(outDir, url)
     
