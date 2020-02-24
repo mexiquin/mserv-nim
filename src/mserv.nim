@@ -22,3 +22,5 @@ when isMainModule:
   let serverUrl = "https://launcher.mojang.com/v1/objects/bb2b6b1aefcd70dfd1892149ac3a215f6c636b07/server.jar"
 
   # TODO create argument parser to grab the commandline arguments
+  discard checkServerFolder()
+  discard dlFile(serverUrl, joinPath(binDir, "Server"))

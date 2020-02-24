@@ -4,16 +4,14 @@ import strutils
 import httpclient
 import os
 import asyncdispatch
-import math
 
 # progress reporting for download
 proc progressChanged(total, progress, speed: BiggestInt) {.async.} =
     # Calculate the percentage
     var perc = (progress.int / total.int) * 100
-    echo("Downloaded ", perc.floor.int, "%")
-    echo("Current rate: ", speed div 1000, "kb/s")
+    echo("Downloaded ", strutils.repeat("=", (perc/10).toInt()), " <", perc.toInt(), "%> ", speed div 1000, "kb/s")
 
-proc fullFileDir(url:string, directory=""): string =
+proc getFullFileDir(url:string, directory=""): string =
     var derivedName = extractFilename(url)
     var finalDir = ""
     if directory == "":
@@ -30,7 +28,7 @@ proc extractFilename(url:string): string =
 
 # Check to make sure that the file made the journey safely
 proc checkDLSuccess(fileDir:string, fileUrl:string): bool = 
-    var fullDir = fullFileDir(fileUrl, fileDir)
+    var fullDir = getFullFileDir(fileUrl, fileDir)
     if fileExists(fullDir) and fullDir.split('/')[fullDir.split('/').high] == extractFilename(fileUrl):
         return true
     else:
@@ -39,7 +37,7 @@ proc checkDLSuccess(fileDir:string, fileUrl:string): bool =
 # roughly Download file information from url
 proc downloadFromUrl(url:string, outDir:string="") {.async.} =
 
-    var fullDir = fullFileDir(url, outDir)
+    var fullDir = getFullFileDir(url, outDir)
     # Download the file from the internet
     var dlClient = newAsyncHttpClient()
     dlClient.onProgressChanged = progressChanged
