@@ -9,15 +9,15 @@ import asyncdispatch
 proc progressChanged(total, progress, speed: BiggestInt) {.async.} =
     # Calculate the percentage
     var perc = (progress.int / total.int) * 100
-    echo("Downloaded ", strutils.repeat("=", (perc/10).toInt()), " <", perc.toInt(), "%> ", speed div 1000, "kb/s")
+    echo("Downloaded ", repeat("=", (perc/10).toInt()), " <", perc.toInt(), "%> ", speed div 1000, "kb/s")
 
 proc getFullFileDir(url:string, directory=""): string =
     var derivedName = extractFilename(url)
     var finalDir = ""
     if directory == "":
-        finalDir = os.joinPath(os.getCurrentDir(), derivedName)
+        finalDir = joinPath(os.getCurrentDir(), derivedName)
     else:
-        finalDir = os.joinPath(directory, derivedName)
+        finalDir = joinPath(directory, derivedName)
 
     return finalDir
 
