@@ -4,7 +4,6 @@ import strutils
 import httpclient
 import os
 import asyncdispatch
-import terminal
 
 # progress reporting for download
 proc progressChanged(total, progress, speed: BiggestInt) {.async.} =

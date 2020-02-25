@@ -11,6 +11,9 @@ import strutils
 let binDir = os.getAppDir()
 let serverUrl = "https://launcher.mojang.com/v1/objects/bb2b6b1aefcd70dfd1892149ac3a215f6c636b07/server.jar"
 
+# TODO - check if server files already generated
+#proc checkServerExists()
+
 # check to see if ./Server directory exists within the binary's scope
 proc checkServerFolder(): bool = 
   if dirExists(os.joinPath(os.getAppDir(), "Server")):
@@ -36,23 +39,30 @@ proc run(initRam="1024M", maxRam="1024M", usegui=false): int =
   return execShellCmd(fmt"java -Xms{initRam} -Xmx{maxRam} -jar server.jar {guiFlag}")
 
 # main process for routing commands to the API
-proc setup(accept_eula=false) = 
+proc setup(accept_eula=false, no_download=false) = 
   # Subcommand for if the user only wants to accept the eula (maybe they accidentally hit no)
   if accept_eula:
     acceptEula()
+    return
 
   discard checkServerFolder() # make sure the server directory exists
-  dlFile(serverUrl, joinPath(binDir, "Server")) # Download the server.jar file
 
-  setCurrentDir("Server") # Set the working dir to the server dir. This makes sure files are executed in the right place
+  # if no_download flag is set, the program will not download the server.jar but will continue the rest of the steps
+  if not no_download:
+    dlFile(serverUrl, joinPath(binDir, "Server")) # Download the server.jar file
+  else:
+    echo "no_download flag set. File will not be downloaded"
+
+  setCurrentDir(joinPath(binDir, "Server")) # Set the working dir to the server dir. This makes sure files are executed in the right place
   echo "Generating Server Files..."
   discard run() # execute the server once to generate the directory structure
   setCurrentDir(ParDir) # Reset the working directory to where it was before (where the binary is located)
+  echo fmt"Directory reset to {getCurrentDir()}"
 
   echo "\nWould you like to accept the Minecraft Server EULA? (Y/n):"
   # Get user input on whether they would like to accept the eula
   var usrIn = readLine(stdin)
-  if usrIn.toLower() == "y" or usrIn == "\n":
+  if usrIn.toLower() == "y" or usrIn == "":
     acceptEula()
     echo "EULA Accepted!"
   else:
