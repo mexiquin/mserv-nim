@@ -4,6 +4,7 @@ import strutils
 import httpclient
 import os
 import asyncdispatch
+import terminal
 
 # progress reporting for download
 proc progressChanged(total, progress, speed: BiggestInt) {.async.} =
@@ -11,6 +12,7 @@ proc progressChanged(total, progress, speed: BiggestInt) {.async.} =
     var perc = (progress.int / total.int) * 100
     echo("Downloaded ", repeat("=", (perc/10).toInt()), " <", perc.toInt(), "%> ", speed div 1000, "kb/s")
 
+# Combines a directory and a file url to become a file path
 proc getFullFileDir(url:string, directory=""): string =
     var derivedName = extractFilename(url)
     var finalDir = ""
@@ -27,7 +29,7 @@ proc extractFilename(url:string): string =
     return name[name.high]
 
 # Check to make sure that the file made the journey safely
-proc checkDLSuccess(fileDir:string, fileUrl:string): bool = 
+proc isDLSuccess*(fileDir:string, fileUrl:string): bool = 
     var fullDir = getFullFileDir(fileUrl, fileDir)
     if fileExists(fullDir) and fullDir.split('/')[fullDir.split('/').high] == extractFilename(fileUrl):
         return true
@@ -38,13 +40,15 @@ proc checkDLSuccess(fileDir:string, fileUrl:string): bool =
 proc downloadFromUrl(url:string, outDir:string="") {.async.} =
 
     var fullDir = getFullFileDir(url, outDir)
+    echo fullDir
     # Download the file from the internet
     var dlClient = newAsyncHttpClient()
-    dlClient.onProgressChanged = progressChanged
-    await dlClient.downloadFile(url, fullDir)
+    try:
+        dlClient.onProgressChanged = progressChanged
+        await dlClient.downloadFile(url, fullDir)
+    except:
+        raise
 
 # Little absraction layer for the download (This is the method that should be used)
-proc dlFile*(url: string, outDir = ""): bool =
+proc dlFile*(url: string, outDir = "") =
     waitFor(downloadFromUrl(url, outDir))
-    return checkDLSuccess(outDir, url)
-    
