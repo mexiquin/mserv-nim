@@ -15,3 +15,4 @@ bin           = @["mserv"]
 
 requires "nim >= 1.0.6"
 requires "cligen"
+requires "termstyle"

@@ -6,6 +6,7 @@ import os
 import cligen
 import strformat
 import strutils
+import termstyle
 
 # Global vars for use throughout the program
 let binDir = os.getAppDir()
@@ -59,7 +60,7 @@ proc setup(accept_eula=false, no_download=false) =
   setCurrentDir(ParDir) # Reset the working directory to where it was before (where the binary is located)
   echo fmt"Directory reset to {getCurrentDir()}"
 
-  echo "\nWould you like to accept the Minecraft Server EULA? (Y/n):"
+  echo style("\nWould you like to accept the Minecraft Server EULA? (Y/n):", termYellow & termBold)
   # Get user input on whether they would like to accept the eula
   var usrIn = readLine(stdin)
   if usrIn.toLower() == "y" or usrIn == "":
