@@ -1,7 +1,7 @@
 # This is just an example to get you started. A typical hybrid package
 # uses this file as the main entry point of the application.
 
-import mservpkg/net, mservpkg/fileIO
+import mservpkg/net, mservpkg/fileIO, mservpkg/logSimp
 import os
 import cligen
 import strformat
@@ -31,7 +31,7 @@ proc acceptEula() =
 
 # Executes the server with the reccommended settings (can be changed using params)
 proc run(initRam="1024M", maxRam="1024M", usegui=false): int = 
-  echo "run function"
+  logInfo("Executing server.jar")
   var guiFlag = case usegui:
     of false:
       "nogui"
@@ -52,28 +52,29 @@ proc setup(accept_eula=false, no_download=false) =
   if not no_download:
     dlFile(serverUrl, joinPath(binDir, "Server")) # Download the server.jar file
   else:
-    echo "no_download flag set. File will not be downloaded"
+    logInfo("no_download flag set. File will not be downloaded")
 
   setCurrentDir(joinPath(binDir, "Server")) # Set the working dir to the server dir. This makes sure files are executed in the right place
-  echo "Generating Server Files..."
+  logInfo("Generating Server Files...")
   discard run() # execute the server once to generate the directory structure
   setCurrentDir(ParDir) # Reset the working directory to where it was before (where the binary is located)
-  echo fmt"Directory reset to {getCurrentDir()}"
 
   echo style("\nWould you like to accept the Minecraft Server EULA? (Y/n):", termYellow & termBold)
   # Get user input on whether they would like to accept the eula
   var usrIn = readLine(stdin)
   if usrIn.toLower() == "y" or usrIn == "":
     acceptEula()
-    echo "EULA Accepted!"
+    echo style("EULA Accepted!", termBold & termGreen)
   else:
-    echo "You didn't accept the EULA. Nothing else to do."
+    echo style("You didn't accept the EULA. Nothing else to do.", termBold & termYellow)
 
 # Deletes the server.jar file and downloads the new one from the url
+#TODO
 proc update() = 
   echo "update function"
 
 # Acts as a hard restart. Deletes all server files, redownloads a new server file and rerun's the setup
+#TODO
 proc wipe() = 
   echo "wipe function"
 

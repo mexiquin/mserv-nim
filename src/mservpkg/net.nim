@@ -4,12 +4,20 @@ import strutils
 import httpclient
 import os
 import asyncdispatch
+import termstyle
+import terminal
+import strformat 
 
 # progress reporting for download
 proc progressChanged(total, progress, speed: BiggestInt) {.async.} =
     # Calculate the percentage
     var perc = (progress.int / total.int) * 100
-    echo("Downloaded ", repeat("=", (perc/10).toInt()), " <", perc.toInt(), "%> ", speed div 1000, "kb/s")
+    let dl = style("Downloading", termGreen & termBold)
+    let prgrs = repeat("=", (perc/4).toInt())
+    let dlspd = speed div 1000
+    stdout.eraseLine
+    stdout.write(fmt"{dl} [{alignString(prgrs, 25)}] {perc.toInt()}% {dlspd} kb/s")
+    stdout.flushFile
 
 # Combines a directory and a file url to become a file path
 proc getFullFileDir(url:string, directory=""): string =
@@ -39,7 +47,6 @@ proc isDLSuccess*(fileDir:string, fileUrl:string): bool =
 proc downloadFromUrl(url:string, outDir:string="") {.async.} =
 
     var fullDir = getFullFileDir(url, outDir)
-    echo fullDir
     # Download the file from the internet
     var dlClient = newAsyncHttpClient()
     try:
@@ -47,6 +54,8 @@ proc downloadFromUrl(url:string, outDir:string="") {.async.} =
         await dlClient.downloadFile(url, fullDir)
     except:
         raise
+    
+    echo "\n" # when done, plop down a newline so that the progress bar doesn't mush together with other text
 
 # Little absraction layer for the download (This is the method that should be used)
 proc dlFile*(url: string, outDir = "") =
