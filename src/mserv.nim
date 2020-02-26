@@ -15,7 +15,7 @@ let serverUrl = "https://launcher.mojang.com/v1/objects/bb2b6b1aefcd70dfd1892149
 # TODO - check if server files already generated
 #proc checkServerExists()
 
-# TODO - check if java is installed
+# TODO - check if java is installed (java 8 specifically)
 #proc checkJavaInstalled()
 
 # check to see if ./Server directory exists within the binary's scope
