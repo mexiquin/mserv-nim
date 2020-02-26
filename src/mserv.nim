@@ -15,6 +15,9 @@ let serverUrl = "https://launcher.mojang.com/v1/objects/bb2b6b1aefcd70dfd1892149
 # TODO - check if server files already generated
 #proc checkServerExists()
 
+# TODO - check if java is installed
+#proc checkJavaInstalled()
+
 # check to see if ./Server directory exists within the binary's scope
 proc checkServerFolder(): bool = 
   if dirExists(os.joinPath(os.getAppDir(), "Server")):
