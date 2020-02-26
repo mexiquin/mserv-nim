@@ -10,13 +10,8 @@ import termstyle
 
 # Global vars for use throughout the program
 let binDir = os.getAppDir()
+let serverDir = joinPath(binDir, "Server")
 let serverUrl = "https://launcher.mojang.com/v1/objects/bb2b6b1aefcd70dfd1892149ac3a215f6c636b07/server.jar"
-
-# TODO - check if server files already generated
-#proc checkServerExists()
-
-# TODO - check if java is installed (java 8 specifically)
-#proc checkJavaInstalled()
 
 # check to see if ./Server directory exists within the binary's scope
 proc checkServerFolder(): bool = 
@@ -29,18 +24,28 @@ proc checkServerFolder(): bool =
     else:
       raise newException(OSError, "Directory creation failed")
 
+# TODO - check if server files already generated
+proc isServerValid(): bool = 
+  if checkServerFolder() and dirExists(joinPath(serverDir, "logs")) and existsFile(joinPath(serverDir, "eula.txt")) and existsFile(joinPath(serverDir, "server.properties")):
+    return true
+  else:
+    return false
+
 proc acceptEula() = 
   fileSearchAndRepl(joinPath(binDir, "Server", "eula.txt"), "eula=false", "eula=true")
 
 # Executes the server with the reccommended settings (can be changed using params)
-proc run(initRam="1024M", maxRam="1024M", usegui=false): int = 
-  logInfo("Executing server.jar")
-  var guiFlag = case usegui:
-    of false:
-      "nogui"
-    else:
-      ""
-  return execShellCmd(fmt"java -Xms{initRam} -Xmx{maxRam} -jar server.jar {guiFlag}")
+proc run(initRam="1024M", maxRam="1024M", usegui=false, isFirstRun=false): int = 
+  if isServerValid() or isFirstRun:
+    logInfo("Executing server.jar")
+    var guiFlag = case usegui:
+      of false:
+        "nogui"
+      else:
+        ""
+    return execShellCmd(fmt"java -Xms{initRam} -Xmx{maxRam} -jar server.jar {guiFlag}")
+  else:
+    raise newException(IOError, style("Server folder does not exis", termBold & termRed))
 
 # main process for routing commands to the API
 proc setup(accept_eula=false, no_download=false) = 
@@ -59,7 +64,7 @@ proc setup(accept_eula=false, no_download=false) =
 
   setCurrentDir(joinPath(binDir, "Server")) # Set the working dir to the server dir. This makes sure files are executed in the right place
   logInfo("Generating Server Files...")
-  discard run() # execute the server once to generate the directory structure
+  discard run(isFirstRun=true) # execute the server once to generate the directory structure
   setCurrentDir(ParDir) # Reset the working directory to where it was before (where the binary is located)
 
   echo style("\nWould you like to accept the Minecraft Server EULA? (Y/n):", termYellow & termBold)
