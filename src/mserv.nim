@@ -43,9 +43,12 @@ proc run(initRam="1024M", maxRam="1024M", usegui=false, isFirstRun=false): int =
         "nogui"
       else:
         ""
-    return execShellCmd(fmt"java -Xms{initRam} -Xmx{maxRam} -jar server.jar {guiFlag}")
+    setCurrentDir(joinPath(binDir, "Server")) # Set the working dir to the server dir. This makes sure files are executed in the right place
+    var extStat = execShellCmd(fmt"java -Xms{initRam} -Xmx{maxRam} -jar server.jar {guiFlag}")
+    setCurrentDir(ParDir) # Reset the working directory to where it was before (where the binary is located)
+    return extStat
   else:
-    raise newException(IOError, style("Server folder does not exis", termBold & termRed))
+    raise newException(IOError, style("Server folder does not exist", termBold & termRed))
 
 # main process for routing commands to the API
 proc setup(accept_eula=false, no_download=false) = 
@@ -62,10 +65,8 @@ proc setup(accept_eula=false, no_download=false) =
   else:
     logInfo("no_download flag set. File will not be downloaded")
 
-  setCurrentDir(joinPath(binDir, "Server")) # Set the working dir to the server dir. This makes sure files are executed in the right place
   logInfo("Generating Server Files...")
   discard run(isFirstRun=true) # execute the server once to generate the directory structure
-  setCurrentDir(ParDir) # Reset the working directory to where it was before (where the binary is located)
 
   echo style("\nWould you like to accept the Minecraft Server EULA? (Y/n):", termYellow & termBold)
   # Get user input on whether they would like to accept the eula
