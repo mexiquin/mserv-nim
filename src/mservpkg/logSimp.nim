@@ -3,7 +3,13 @@ import termstyle
 
 # Print Info log
 proc logInfo*(message:string) = 
-    echo style("[INFO]: ", termBold & termYellow), message
+    ## Print a message to the console with neutral info coloring
+    echo style("[INFO]: ", termBold & termWhite), message
+
+proc logWarning*(message:string) = 
+    ## Print a message to the console with yellow warning coloring
+    echo style("[WARN]: ", termBold & termYellow), message
 
 proc logError*(message:string) = 
+    ## Print a message to the console with red error coloring
     echo style("[ERROR]: ", termBold & termRed), message

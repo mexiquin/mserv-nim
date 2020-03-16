@@ -7,6 +7,9 @@ import asyncdispatch
 import termstyle
 import terminal
 import strformat 
+import htmlparser
+import xmltree
+import logSimp
 
 # progress reporting for download
 proc progressChanged(total, progress, speed: BiggestInt) {.async.} =
@@ -37,6 +40,8 @@ proc extractFilename(url:string): string =
 
 # Check to make sure that the file made the journey safely
 proc isDLSuccess*(fileDir:string, fileUrl:string): bool = 
+    ## Checks if the download of the file was successful
+    logInfo(fmt"Verifying dl from {fileUrl} to {fileDir}")
     var fullDir = getFullFileDir(fileUrl, fileDir)
     if fileExists(fullDir) and fullDir.split('/')[fullDir.split('/').high] == extractFilename(fileUrl):
         return true
@@ -45,7 +50,6 @@ proc isDLSuccess*(fileDir:string, fileUrl:string): bool =
 
 # roughly Download file information from url
 proc downloadFromUrl(url:string, outDir:string="") {.async.} =
-
     var fullDir = getFullFileDir(url, outDir)
     # Download the file from the internet
     var dlClient = newAsyncHttpClient()
@@ -59,4 +63,12 @@ proc downloadFromUrl(url:string, outDir:string="") {.async.} =
 
 # Little absraction layer for the download (This is the method that should be used)
 proc dlFile*(url: string, outDir = "") =
+    ## Download a file from a url to the computer. If output directory not specified, will download to working directory
     waitFor(downloadFromUrl(url, outDir))
+
+#TODO webscraping to find downloadable files
+proc scrapePage*(url:string): XmlNode = 
+    ## Function for web scraping and gathering info about a webpage
+    logInfo(fmt"Scraping {url}")
+    var client = newHttpClient()
+    return parseHtml(client.getContent(url))
