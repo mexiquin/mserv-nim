@@ -2,8 +2,8 @@
 An easy-ish way to manage a minecraft server
 
 # Generated Help Page
-
-```This is a multiple-dispatch command.  Top-level --help/--help-syntax
+```
+This is a multiple-dispatch command.  Top-level --help/--help-syntax
 is also available.  Usage is like:
     mserv {SUBCMD} [subcommand-opts & args]
 where subcommand syntaxes are as follows:
