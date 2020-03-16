@@ -13,3 +13,5 @@ where {SUBCMD} is one of:
   test
   wipe    Wipe out the entire Server folder and re-run the setup
   ```
+# Requirements
+- Java (Version 8 recommended, but new versions may work too)
