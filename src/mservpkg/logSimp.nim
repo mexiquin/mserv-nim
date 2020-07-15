@@ -1,5 +1,5 @@
 # Simple logging for printing info to the console
-import termstyle
+import termstyle, strformat
 
 # Print Info log
 proc logInfo*(message:string) = 
@@ -13,3 +13,19 @@ proc logWarning*(message:string) =
 proc logError*(message:string) = 
     ## Print a message to the console with red error coloring
     echo style("[ERROR]: ", termBold & termRed), message
+
+proc logGreen*(message:string) = 
+    ## Print a message to the console with red error coloring
+    echo style(fmt"{message}", termBold & termGreen)
+
+proc logBlue*(message:string) = 
+    ## Print a message to the console with red error coloring
+    echo style(fmt"{message}", termBold & termBlue)
+
+proc txtGreen*(message:string): string = 
+    ## Print a message to the console with red error coloring
+    return style(fmt"{message}", termBold & termGreen)
+
+proc txtBlue*(message:string): string = 
+    ## Print a message to the console with red error coloring
+    return style(fmt"{message}", termBold & termBlue)

@@ -24,8 +24,8 @@ proc progressChanged(total, progress, speed: BiggestInt) {.async.} =
 
 # Combines a directory and a file url to become a file path
 proc getFullFileDir(url:string, directory=""): string =
+    var finalDir:string
     var derivedName = extractFilename(url)
-    var finalDir = ""
     if directory == "":
         finalDir = joinPath(os.getCurrentDir(), derivedName)
     else:
@@ -72,3 +72,4 @@ proc scrapePage*(url:string): XmlNode =
     logInfo(fmt"Scraping {url}")
     var client = newHttpClient()
     return parseHtml(client.getContent(url))
+
