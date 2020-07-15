@@ -2,7 +2,7 @@
 # uses this file as the main entry point of the application.
 
 import mservpkg/net, mservpkg/fileIO, mservpkg/logSimp
-import os, osproc
+import os
 import cligen
 import strformat
 import strutils
